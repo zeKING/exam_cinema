@@ -85,15 +85,33 @@ class User(AbstractUser):
         verbose_name_plural = "Users"
 
 
-class Genre(models.Model):
-    name = models.CharField("Name", max_length=100)
+# class Genre(models.Model):
+#     name = models.CharField("Name", max_length=100)
+#
+#     def __str__(self):
+#         return self.name
 
 
 class Movie(models.Model):
     name = models.CharField("Name", max_length=100)
     description = models.TextField("Description")
-    age_limit = models.IntegerField("Age Limit", validators=[MinValueValidator(0)])
-    genres = models.ManyToManyField(Genre)
+    duration = models.IntegerField("Duration(minutes)", validators=[MinValueValidator(0), ])
+    age_limit = models.IntegerField("Age Limit", validators=[MinValueValidator(0), ])
+    # genres = models.ManyToManyField(Genre)
+    rating = models.FloatField("Rating", validators=[MinValueValidator(0), MaxValueValidator(5)], null=True,
+                               blank=True, default=0)
+    photo = models.ImageField("Photo", upload_to='images/movies',
+                              validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'jpeg',
+                                                                                     'jfif', 'webp', 'webm'])])
+
+    def __str__(self):
+        return self.name
+
+    def get_feedback_count(self):
+        return self.feedback_set.count()
+
+    def get_feedbacks(self):
+        return self.feedback_set.all()
 
 
 class Hall(models.Model):
@@ -106,31 +124,41 @@ class Hall(models.Model):
 
 
 class Session(models.Model):
-    movie = models.ForeignKey(Movie, on_delete=models.DO_NOTHING)
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, db_constraint=False)
     hall = models.ForeignKey(Hall, on_delete=models.DO_NOTHING)
     time = models.DateTimeField()
     price = models.IntegerField(validators=[MinValueValidator(0), ])
 
     def __str__(self):
-        return self.hall
+        return f'{self.movie.name}, {self.hall.name}'
 
 
 class Ticket(models.Model):
-    id = models.UUIDField("ID", primary_key=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
-    row = models.IntegerField("Row")
-    seat = models.IntegerField("Seat")
-    status = models.IntegerField("Status", )  # 0 - not available, 1 - free, 2 - sold
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING)
+    row = models.IntegerField("Row", validators=[MinValueValidator(1), ])
+    seat = models.IntegerField("Seat", validators=[MinValueValidator(1), ])
+    status = models.IntegerField("Status", default=0)  # 0 - free, 1 - prepare, 2 - sold, 3 - not available
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='owner', on_delete=models.DO_NOTHING, null=True,
+                              blank=True)
+    editor = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='editor', on_delete=models.DO_NOTHING,
+                               null=True, blank=True)
+    # transaction = models.ForeignKey(ClickTransaction, on_delete=models.CASCADE)
+    phone = models.CharField("Phone", max_length=19, validators=[validate_uzb_phone, ], null=True)
+    tg_owner_id = models.IntegerField("Tg_user_id", null=True, blank=True)
 
     def __str__(self):
-        return f'{self.session.hall.name}, {self.row} ряд, {self.seat} место, статус {self.status}'
+        return f'{self.session.movie.name}, {self.session.hall.name}, {self.created_at}, {self.row} ряд, {self.seat} ' \
+               f'место, ' \
+               f'статус {self.status}'
 
     class Meta:
         verbose_name = 'Ticket'
         verbose_name_plural = 'Tickets'
         ordering = ('session', )
+
+
 
 
 class Feedback(models.Model):
@@ -153,7 +181,7 @@ class Support(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField("Created", auto_now_add=True)
     file = models.FileField("File", blank=True, null=True, validators=[FileExtensionValidator(allowed_extensions=[
-        'jpg', 'png', 'jpeg', 'jfif', 'docx', 'doc', 'pdf'])],
+        'jpg', 'png', 'jpeg', 'jfif', 'docx', 'doc', 'pdf', 'webp', 'webm', 'rar', 'zip'])],
         upload_to="files/support")
     solved = models.BooleanField("Solved", default=False)
 
@@ -171,12 +199,12 @@ class Support(models.Model):
 
 
 class News(models.Model):
-    title = models.CharField("Title", max_length=100)
-    description = models.TextField("Description")
+    title = models.CharField("Title", max_length=100, null=True, blank=True)
+    description = models.TextField("Description", null=True, blank=True)
     created_at = models.DateTimeField("Created", auto_now_add=True)
     photo = models.ImageField("Photo", upload_to='images/news',
                               validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'jpeg',
-                                                                                     'jfif'])])
+                                                                                     'jfif', 'webp', 'webm'])])
 
     class Meta:
         verbose_name = 'New'
@@ -184,4 +212,4 @@ class News(models.Model):
         ordering = ('-created_at', )
 
     def __str__(self):
-        return self.title
+        return f'Новость номер {self.id}'

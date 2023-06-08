@@ -23,3 +23,21 @@ class SupportPagination(PageNumberPagination):
     page_size = 15
     page_size_query_param = 'limit'
     max_page_size = 10000000
+
+
+class MoviePagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'limit'
+    max_page_size = 10000000
+
+
+class SessionPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'limit'
+    max_page_size = 10000000
+
+
+class TicketPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'limit'
+    max_page_size = 10000000

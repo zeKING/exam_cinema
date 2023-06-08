@@ -1,6 +1,42 @@
 from django.urls import path
 from .views import *
-
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 urlpatterns = [
+    path('auth/register', RegisterView.as_view()),
+    path('auth/login', TokenObtainPairView.as_view()),
+    path('auth/user', UserAPIGet.as_view()),
+    path('admin-user/user-list', UserAPIGetAll.as_view()),
+    path('admin-user/user/update/<int:pk>', AdminUserAPIUpdate.as_view()),
+    path('admin-user/user/delete/<int:pk>', AdminUserAPIDelete.as_view()),
+    path('role', RoleAPIGetAll.as_view()),
+    path('admin-user/support', AdminSupportAPIGet.as_view()),
+    path('admin-user/support/update/<int:pk>', SupportAPIUpdate.as_view()),
+    path('support/create', SupportAPICreate.as_view()),
+    path('feedback/create', FeedbackAPICreate.as_view()),
+    path('feedback/can-create/<int:pk>', FeedbackAPICanCreate.as_view()),
+    path('admin-user/feedback', AdminFeedbackAPIGetAll.as_view()),
+    path('admin-user/feedback/update/<int:pk>', AdminFeedbackAPIUpdate.as_view()),
+    path('hall', HallAPIGetALL.as_view()),
+    # path('genres', GenreAPIGetAll.as_view()),
+    path('movie', MovieAPIGetAll.as_view()),
+    path('movie/<int:pk>', MovieAPIGet.as_view()),
+    path('movie/create', MovieAPICreate.as_view()),
+    path('movie/update/<int:pk>', MovieAPIUpdate.as_view()),
+    path('movie/delete/<int:pk>', MovieAPIDelete.as_view()),
+    path('session', SessionAPIGetAll.as_view()),
+    path('session/create', SessionAPICreate.as_view()),
+    path('session/<int:pk>', SessionAPIGet.as_view()),
+    path('session/update/<int:pk>', SessionAPIUpdate.as_view()),
+    path('session/delete/<int:pk>', SessionAPIDelete.as_view()),
+    path('ticket', TicketAPIGetAll.as_view()),
+    path('ticket/my', TicketAPIGetMy.as_view()),
+    path('ticket/create', TicketAPICreate.as_view()),
+    path('ticket/update/<int:pk>', TicketAPIUpdate.as_view()),
+    path('ticket/delete/<int:pk>', TicketAPIDelete.as_view()),
+    path('news', NewsAPIGetAll.as_view()),
+    path('news/create', NewsAPICreate.as_view()),
+    path('news/update/<int:pk>', NewsAPIUpdate.as_view()),
+    path('news/delete/<int:pk>', NewsAPIDelete.as_view()),
+
 
 ]
